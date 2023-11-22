@@ -1,37 +1,24 @@
-// Input 1:
-// ```
-// 2 book at 12.49
-// 1 music CD at 14.99
-// 1 chocolate bar at 0.85
-
-// Output 1:
-// ```
-// 2 book: 24.98
-// 1 music CD: 16.49
-// 1 chocolate bar: 0.85
-// Sales Taxes: 1.50
-// Total: 42.32
-// ```
-
-import { Product } from "./Product";
+import { Product } from "./Classes/Product";
 import { data } from "./providers/data";
-import { goods, taxes } from "./utils/constants";
+import { goods } from "./utils/constants";
+import { getIsImported, getProductType, refineName } from "./utils/utils";
 
 
 
-const listProducts = (receptedProducts: string[][]) => {
+const listProducts = (receptedProducts: string[][]): Product[][] => {
   let receipts: Array<Product[]> = [];
 
   receptedProducts.forEach((receipt: string[]) => {
     let products: Array<Product> = [];
     receipt.forEach((product: string) => {
+      const name = refineName(product);
       const splittedProduct = product.split(" ");
+      const type = getProductType(goods, name);
+
       const quantity = parseInt(splittedProduct[0]);
-      const isImported = (/(imported)/i).test(product);
-      const name = product.replace(/[0-9]/g, '').replace(/\./, '').replace(" at ", " ").trim();
-      const type = Object.entries(goods).find(good => good[1].some(item => name.split(' ').includes(item)));
       const price = parseFloat(splittedProduct[splittedProduct.length - 1]);
       const productType = type ? type[0] : "Other";
+      const isImported = getIsImported(product);
       products.push(new Product(name, quantity, price, productType, isImported));
     });
 
@@ -41,4 +28,15 @@ const listProducts = (receptedProducts: string[][]) => {
   return receipts;
 };
 
-console.log(listProducts(data));
+const calculateTaxes = () => {
+  const receiptArr = listProducts(data);
+
+  const receiptsWithTotals = receiptArr.map(receipt => ({
+    Receipt: receipt.map(item => item.name),
+    SalesTaxes: receipt.reduce((acc, product) => acc + product.tax, 0.00).toFixed(2),
+    Total: receipt.reduce((acc, product) => acc + product.taxedPrice, 0.00).toFixed(2),
+  }));
+  return receiptsWithTotals;
+}
+
+console.log(calculateTaxes());

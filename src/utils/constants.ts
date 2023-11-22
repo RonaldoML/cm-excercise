@@ -1,10 +1,12 @@
+import { GoodsType } from "./types";
+
 export const taxes = {
   imported: 5,
   basic: 10,
 };
 
-export const goods = {
+export const goods: GoodsType = {
   Books: ["book"],
-  Food: ["chocolate", "meat", "water"],
+  Food: ["meat", "chocolate", "chocolates", "water"],
   Medical: ["pills"],
 };
